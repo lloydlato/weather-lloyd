@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Update - Iligan City</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: url("weather.jpg") no-repeat center center fixed;
+        background-size: cover;
+        color: #333;
+        line-height: 1.4;
+      }
+      .container {
+        max-width: 800px;
+        margin: 100px auto;
+        padding: 20px;
+        background: rgba(243, 241, 241, 0.8);
+        border-radius: 10px;
+        text-align: left;
+      }
+      header {
+        text-align: center;
+        padding: 50px;
+        background-color: #aac29b;
+        color: #080808;
+        border-radius: 5px;
+        margin: 10px;
+      }
+      header:hover {
+        background-color: #40a848;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 2.5em;
+      }
+      #weather {
+        text-align: center;
+        margin: 20px 0;
+      }
+      #weather h2 {
+        font-size: 2em;
+        margin-bottom: 10px;
+        color: #020202;
+      }
+      #weather p {
+        font-size: 1.2em;
+        margin: 10px 0;
+      }
+      .day {
+        margin: 10px 0;
+      }
+      footer {
+        background-color: #9c94a1;
+        color: #0a0606;
+        padding: 5px;
+        text-align: center;
+        border-radius:  20px;
+        margin-top: 1px;
+        margin: 30px;
+        font-size: 30px;
+      }
+      @media (max-width: 600px) 
+      .container {
+        padding: 10px;
+      }
+      header h1 {
+        font-size: 2em;
+      } 
+      #weather h2 {
+        font-size: 1.1em;
+      }
+      #weather p {
+        font-size: 1em;
+      }
+      footer:hover {
+        background-color: #40a848;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Weather Update - Iligan City, Philippines</h1>
+      </header>
+      <div id="weather"></div>
+    </div>
+    <footer>
+      <p>Lloyd A. Lato - August 12, 2024</p>
+    </footer>
+    <script>
+      document.addEventListener("DOMContentLoaded", async function () {
+        const apiKey = "cc68bd4d6b26495ba2d60337241208";
+        const cityName = "Iligan";
+        const apiEndpoint = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${cityName}&days=7`;
+
+        try {
+          const response = await fetch(apiEndpoint);
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const weatherData = await response.json();
+
+          console.log("Weather Data:", weatherData);
+
+          const now = new Date();
+          const options = {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          };
+          const formattedDateTime = now.toLocaleDateString("en-US", options);
+
+          const weatherContainer = document.getElementById("weather");
+          const currentWeather = weatherData.current;
+          const forecast = weatherData.forecast.forecastday;
+
+          weatherContainer.innerHTML = `
+            <h2>${cityName}</h2>
+            <p><strong>Date and Time:</strong> ${formattedDateTime}</p>
+            <p><strong>Temperature:</strong> ${currentWeather.temp_c}°C</p>
+            <p><strong>Weather:</strong> ${currentWeather.condition.text}</p>
+            <p><strong>Humidity:</strong> ${currentWeather.humidity}%</p>
+        `;
+
+          forecast.forEach((day) => {
+            const dayDate = new Date(day.date);
+            const dayName = dayDate.toLocaleDateString("en-US", {
+              weekday: "long",
+            });
+            const dayDiv = document.getElementById(
+              `day-${dayDate
+                .toLocaleDateString("en-GB", { weekday: "short" })
+                .toLowerCase()}`
+            );
+            if (dayDiv) {
+              dayDiv.innerHTML = `
+                    <p>${dayName}</p>
+                    <p><time datetime="${day.date}">${day.date}</time></p>
+                    <p><strong>Max Temp:</strong> ${day.day.maxtemp_c}°C</p>
+                    <p><strong>Min Temp:</strong> ${day.day.mintemp_c}°C</p>
+                    <p><strong>Weather:</strong> ${day.day.condition.text}</p>
+                `;
+            }
+          });
+        } catch (error) {
+          const weatherContainer = document.getElementById("weather");
+          weatherContainer.innerHTML = `<p>Unable to retrieve weather data: ${error.message}</p>`;
+
+          console.error("Error fetching weather data:", error);
+        }
+      });
+    </script>
+  </body>
+</html>
